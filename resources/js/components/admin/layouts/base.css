@@ -1,0 +1,48 @@
+body {
+    padding: 0;
+    margin: 0;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+li + li {
+    margin-top: 0.5rem;
+}
+
+.bas header {
+    height: 50px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+.bas h1 {
+    margin: 0;
+    padding: 0;
+    font-size: 1.5em;
+}
+
+.bas .side-by-side {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+.bas nav {
+    flex: 0 1 100px;
+    padding: 1rem 0;
+}
+
+.bas .content {
+    background-color: #CCCCCC;
+    flex: 1;
+    min-height: calc( 100vh - 50px );
+    padding: 1rem;
+    border-radius: 1rem 0 0 0;
+    box-shadow: inset 0 8px 10px -10px #7a7a7a, inset 8px 0 10px -10px #7a7a7a;
+}
