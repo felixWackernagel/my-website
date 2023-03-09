@@ -54,7 +54,7 @@
     const updateLocation = async () => {
         await axios.post( `/api/update_location/${form.value.id}`, form.value )
             .then( response => {
-                toast.fire( {
+                Toast.fire( {
                     icon: 'success',
                     title: 'Update successfully'
                 } );

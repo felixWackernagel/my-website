@@ -57,11 +57,12 @@
         await axios.post( '/api/v1/quizzes/', form.value )
             .then( response => {
                 errors.value = null;
+                let quizNumber = form.value.number;
                 getQuizzes();
                 closeModal();
-                toast.fire( {
+                Toast.fire( {
                     icon: 'success',
-                    title: 'New Quiz successfully created.'
+                    title: `Quiz #${quizNumber} wurde gespeichert.`
                 } );
             } )
             .catch( error => {
@@ -73,11 +74,12 @@
         await axios.put( `/api/v1/quizzes/${form.value.id}`, form.value )
             .then( response => {
                 errors.value = null;
+                let quizNumber = form.value.number;
                 getQuizzes();
                 closeModal();
-                toast.fire( {
+                Toast.fire( {
                     icon: 'success',
-                    title: 'Quiz successfully updated.'
+                    title: `Quiz #${quizNumber} wurde aktualisiert.`
                 } );
             } )
             .catch( error => {
@@ -85,13 +87,13 @@
             } );
     };
 
-    const deleteQuiz = async (id) => {
+    const deleteQuiz = async (id, quizNumber) => {
         Swal.fire( {
-            title: 'Soll das Quiz gelöscht werden?',
-            icon: 'warning',
+            text: `Soll Quiz #${quizNumber} wirklich gelöscht werden?`,
+            icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#3885d6',
-            cancelButtonColor: '#d33',
+            reverseButtons: true,
+            confirmButtonColor: '#dc3545',
             confirmButtonText: 'Löschen',
             cancelButtonText: 'Abbrechen'
         } )
@@ -99,10 +101,11 @@
             if( result.value ) {
                 axios.delete( `/api/v1/quizzes/${id}` )
                     .then( response => {
+                        
                         getQuizzes();
-                        toast.fire( {
+                        Toast.fire( {
                             icon: 'success',
-                            title: 'Das Quiz wurde gelöscht.'
+                            title: `Quiz #${quizNumber} wurde gelöscht.`
                         } );
                     } );
             }
@@ -154,7 +157,7 @@
                                 <td>{{ formatDateTime( quiz.started_at ) }}</td>
                                 <td>
                                     <button type="button" class="btn btn-sm btn-warning me-3" @click="editModal( quiz )"><i class="bi bi-pencil"></i></button>
-                                    <button type="button" class="btn btn-sm btn-danger" @click="deleteQuiz( quiz.id )"><i class="bi bi-trash"></i></button>
+                                    <button type="button" class="btn btn-sm btn-danger" @click="deleteQuiz( quiz.id, quiz.number )"><i class="bi bi-trash"></i></button>
                                 </td>
                             </tr>
                         </tbody>
@@ -165,46 +168,62 @@
 
         <Modal
             :custom_classes="[]" 
-            v-model="showModal">
-            <div v-for="(v, k) in errors" :key="k" v-if="errors">
+            v-model="showModal"
+            @modal-closed="closeModal">
+            <!-- <div v-for="(v, k) in errors" :key="k" v-if="errors">
                 <div v-for="error in v" :key="error">{{ error }}</div>
-            </div>
-            <form>
-                <div>
-                    <input name="number" placeholder="Number" type="number" min="1" v-model="form.number" />
-                    <div v-for="error in errors.number" :key="error" v-if="errors?.number">{{ error }}</div>
-                    <br />
-                    <input name="quiz_master" placeholder="Quiz-Master" type="text" v-model="form.quiz_master" />
-                    <div v-for="error in errors.quiz_master" :key="error" v-if="errors?.quiz_master">{{ error }}</div>
-                    <br />
-                    <input name="quiz_winner" placeholder="Winner" type="text" v-model="form.quiz_winner" />
-                    <div v-for="error in errors.quiz_winner" :key="error" v-if="errors?.quiz_winner">{{ error }}</div>
-                    <br />
-                    <select name="location" v-model="form.location_id">
-                        <option :value="null" selected="selected">---</option>
-                        <option v-for="location in locations" :value="location.id" :key="location.id">
-                            {{ location.name }}
-                        </option>
-                    </select>
-                    <div v-for="error in errors.location" :key="error" v-if="errors?.location">{{ error }}</div>
-                    <br />
-                    <input name="started_at" placeholder="Date & Time" type="datetime-local" v-model="form.started_at" />
-                    <div v-for="error in errors.started_at" :key="error" v-if="errors?.started_at">{{ error }}</div>
-                </div>
-                <div>
-                    <button @click.prevent="closeModal()">Cancel</button>
-                    
-                </div>
+            </div> -->
+            <form novalidate>
+                    <div class="mb-3 row">
+                        <label for="number" class="col-sm-4 col-form-label">Nummer</label>
+                        <div class="col-sm-8">
+                            <input type="number" min="1" v-model="form.number" class="form-control" :class="{ 'is-invalid' : errors?.number }" id="number" required />
+                            <div class="invalid-feedback" v-for="error in errors.number" :key="error" v-if="errors?.number">{{ error }}</div>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="quiz_master" class="col-sm-4 col-form-label">Quiz-Master</label>
+                        <div class="col-sm-8">
+                            <input type="text" v-model="form.quiz_master" class="form-control" :class="{ 'is-invalid' : errors?.quiz_master }" id="quiz_master" />
+                            <div class="invalid-feedback" v-for="error in errors.quiz_master" :key="error" v-if="errors?.quiz_master">{{ error }}</div>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="quiz_winner" class="col-sm-4 col-form-label">Gewinner</label>
+                        <div class="col-sm-8">
+                            <input type="text" v-model="form.quiz_winner" class="form-control" :class="{ 'is-invalid' : errors?.quiz_winner }" id="quiz_winner" />
+                            <div class="invalid-feedback" v-for="error in errors.quiz_winner" :key="error" v-if="errors?.quiz_winner">{{ error }}</div>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="location" class="col-sm-4 col-form-label">Kneipe</label>
+                        <div class="col-sm-8">
+                            <select class="form-select" :class="{ 'is-invalid' : errors?.location }" id="location" v-model="form.location_id">
+                                <option selected :value="null"></option>
+                                <option v-for="location in locations" :value="location.id" :key="location.id">
+                                    {{ location.name }}
+                                </option>
+                            </select>
+                            <div class="invalid-feedback" v-for="error in errors.location" :key="error" v-if="errors?.location">{{ error }}</div>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="started_at" class="col-sm-4 col-form-label">Datum</label>
+                        <div class="col-sm-8">
+                            <input type="datetime-local" v-model="form.started_at" class="form-control" :class="{ 'is-invalid' : errors?.started_at }" id="started_at" />
+                            <div class="invalid-feedback" v-for="error in errors.started_at" :key="error" v-if="errors?.started_at">{{ error }}</div>
+                        </div>
+                    </div>
             </form>
 
             <template #title>
-                <div v-show="!editMode">New Quiz</div>
-                <div v-show="editMode">Update Quiz</div>
+                <div v-show="!editMode">Quiz anlegen</div>
+                <div v-show="editMode">Quiz bearbeiten</div>
             </template>
             <template #footer>
-                <button @click="closeModal()" type="button" class="btn btn-secondary">Cancel</button>
-                <button @click.prevent="createQuiz()" v-show="!editMode" type="button" class="btn btn-primary">Create</button>
-                <button @click.prevent="updateQuiz()" v-show="editMode" type="button" class="btn btn-primary">Update</button>
+                <button @click.prevent="closeModal()" type="button" class="btn btn-secondary">Abbrechen</button>
+                <button @click.prevent="createQuiz()" v-show="!editMode" type="button" class="btn btn-success">Anlegen</button>
+                <button @click.prevent="updateQuiz()" v-show="editMode" type="button" class="btn btn-warning">Speichern</button>
             </template>
         </Modal>
     </Bas>
@@ -213,17 +232,5 @@
     .actions {
         display: flex;
         justify-content: space-between;
-    }
-
-    .quiz {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        align-items: center;
-        gap: 20px;
-    }
-
-    .quiz-actions {
-        margin-left: auto;
     }
 </style>

@@ -8,7 +8,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', modelValue: boolean): void
+  (e: 'modalClosed' ): void
 }>();
 
 const modalRef = ref<HTMLElement | null>( null );
@@ -17,19 +17,27 @@ let modal: Modal;
 onMounted( () => {
   if (modalRef.value) {
     modal = new Modal(modalRef.value)
+    modalRef.value.addEventListener('hidden.bs.modal', event => {
+      // closed modal via backdrop
+      // modal is already dismissed but model value isn't updated
+      if( props.modelValue ) {
+        close();
+      }
+    });
   }
 } );
 
 watch( () => props.modelValue, (modelValue) => {
+  // show or hide the modal after modelValue was changed outside of this component
   if (modelValue) {
-    modal.show()
+    modal.show();
   } else {
-    modal.hide()
+    modal.hide();
   }
 } );
 
 function close() {
-  emit('update:modelValue', false)
+  emit('modalClosed');
 }
 
 const base_classes = ['modal', 'fade'];

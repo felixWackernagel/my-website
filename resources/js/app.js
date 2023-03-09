@@ -1,21 +1,26 @@
+import './../css/app.css';
+
 import './bootstrap';
 
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap";
-import "bootstrap-icons/font/bootstrap-icons.css";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import 'sweetalert2/dist/sweetalert2.css';
 
 window.Swal = Swal;
-const toast = Swal.mixin( {
+window.Toast = Swal.mixin( {
     toast: true,
     position: 'top-end',
     showConfirmButton: false,
     timer: 3000,
-    timerProgressBar: true
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener( 'mouseenter', Swal.stopTimer );
+        toast.addEventListener( 'mouseleave', Swal.resumeTimer );
+      }
 } );
-window.toast = toast;
 
 import { createApp } from 'vue';
 
